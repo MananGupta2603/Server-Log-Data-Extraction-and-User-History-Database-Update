@@ -124,8 +124,8 @@ def main():
     if not check_mongodb_connection(MONGO_URI):
         exit() 
 
-    # if save_to_mongodb(records):
-    #     print("Saved records to MongoDB.")
+    if save_to_mongodb(records):
+        print("Saved records to MongoDB.")
 
     docs = fetch_from_mongodb()
     if docs:
