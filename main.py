@@ -8,7 +8,7 @@ import configparser
 from datetime import datetime
 from pymongo import MongoClient
 from dateutil import parser as date_parser
-
+import time
 # Load configuration from config.ini
 config = configparser.ConfigParser()
 config.read(r'Server-Log-Data-Extraction-and-User-History-Database-Update\config.ini')
@@ -80,6 +80,7 @@ def fetch_from_mongodb():
     client.close()
     return docs
 
+# print("Using MONGO_URI =", repr(MONGO_URI))
 
 def save_to_sqlite(records, db_path):
     
@@ -115,25 +116,34 @@ def main():
     if pairs:
         print(f"Extracted {len(pairs)} email-date pairs.")
 
+    time.sleep(2)
 
     records = transform_records(pairs)
     if records:
         print(f"Transformed {len(records)} email-date pairs.")
 
+    time.sleep(2)
 
     if not check_mongodb_connection(MONGO_URI):
         exit() 
+    
+    time.sleep(2)
 
-    if save_to_mongodb(records):
-        print("Saved records to MongoDB.")
+    save_to_mongodb(records)
+    print("Saved records to MongoDB.")
+    
+    time.sleep(5)
 
     docs = fetch_from_mongodb()
     if docs:
         print("Fetched data from Mongodb")
+    
+    time.sleep(5)
 
     save_to_sqlite(docs, SQLITE_DB)
     print(f"Inserted into SQLite DB at {SQLITE_DB}.")
 
+    time.sleep(5)
    
     queries = [
         ("Unique Emails", "SELECT DISTINCT email FROM user_history;"),
@@ -144,11 +154,12 @@ def main():
 
     print("\nRunning all the queries...\n")
     while True:
-        print("Select a query to run:")
+        print("\nSelect a query to run:")
         for idx, (label, _) in enumerate(queries, start=1):
             print(f"  {idx}. {label}")
         print(f"  {len(queries) + 1}. Exit")
         choice = input("Enter choice number: ").strip()
+        print("\n")
         if not choice.isdigit() or not (1 <= int(choice) <= len(queries) + 1):
             print("Invalid choice, try again.")
             continue
@@ -158,10 +169,11 @@ def main():
         label, sql = queries[choice - 1]
         print(f"-- {label} --")
         rows = run_sql_query(SQLITE_DB, sql)
+        time.sleep(2)
         for row in rows:
             print(' | '.join(str(item) for item in row))
         
-
+    time.sleep(2)
     print("Finished")
 if __name__ == '__main__':
     main()
